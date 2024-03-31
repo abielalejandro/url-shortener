@@ -1,0 +1,17 @@
+app:
+  name: 'tgs-service'
+  version: '0.0.1'
+
+http:
+  port: '8080'
+
+logger:
+  log_level: 'debug'
+
+storage:
+  type: generic
+
+redis:
+    addr: 'localhost:6379'
+    password: ''
+    db: 0
