@@ -13,6 +13,7 @@ type (
 		HTTP    `yaml:"http"`
 		Log     `yaml:"logger"`
 		Storage `yaml:"storage"`
+		Token   `yaml:"token"`
 	}
 
 	// App -.
@@ -40,6 +41,9 @@ type (
 		Addr     string `yaml:"addr" env:"REDIS_HOST" env-default:"localhost:6379"`
 		Password string `env:"REDIS_PWD" env-default:""`
 		Db       string `env:"REDIS_DB" env-default:"0"`
+	}
+	Token struct {
+		Range int `yaml:"range" env: "TOKEN_RANGE" env-default:"6"`
 	}
 )
 

@@ -2,6 +2,7 @@ package storage
 
 import (
 	"math/rand"
+	"time"
 
 	"github.com/abielalejandro/tgs-service/config"
 )
@@ -11,7 +12,8 @@ type GenericStorage struct {
 }
 
 func (storage *GenericStorage) GetNext(sequenceName string) (int, error) {
-	return rand.Intn(1000000), nil
+	rand.Seed(time.Now().UnixNano())
+	return rand.Intn(9) + 1, nil
 }
 
 func NewGenericStorage(config *config.Config) Storage {
