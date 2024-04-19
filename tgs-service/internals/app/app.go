@@ -1,6 +1,7 @@
 package app
 
 import (
+	"github.com/abielalejandro/tgs-service/api"
 	"github.com/abielalejandro/tgs-service/config"
 	"github.com/abielalejandro/tgs-service/internals/services"
 	"github.com/abielalejandro/tgs-service/internals/storage"
@@ -11,13 +12,16 @@ type App struct {
 	storage.Storage
 	*config.Config
 	*services.TgsService
+	*api.HttpApi
 }
 
 func NewApp(config *config.Config) *App {
+	svc := services.NewTgsService(config)
 	return &App{
 		Config:     config,
 		Storage:    storage.NewStorage(config),
-		TgsService: services.NewTgsService(config),
+		TgsService: svc,
+		HttpApi:    api.NewHttpApi(config, svc),
 	}
 }
 
@@ -26,12 +30,5 @@ func (app *App) Run() {
 	l.Info("App Running")
 
 	app.TgsService.GenerateRange(app.Storage)
-	for i := 0; i < 1000; i++ {
-		next, err := app.TgsService.GenerateToken()
-		if err != nil {
-			app.TgsService.GenerateRange(app.Storage)
-		}
-		l.Info(next)
-	}
-
+	app.HttpApi.Run()
 }

@@ -12,6 +12,10 @@ import (
 	"go.uber.org/atomic"
 )
 
+type Service interface {
+	GenerateToken() (string, error)
+}
+
 type Range struct {
 	Min int
 	Max int
