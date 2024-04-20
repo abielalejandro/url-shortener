@@ -1,0 +1,17 @@
+syntax="proto3";
+
+package api;
+
+option go_package = "github.com/abielalejandro/tgs-service/api";
+
+message NextRequest{}
+
+message NextResponse {
+  string token=1;
+}
+
+service TgsService {
+    rpc Next(NextRequest) returns (NextResponse) {}
+    rpc Health(NextRequest) returns (NextResponse) {}
+} 
+

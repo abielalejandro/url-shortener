@@ -10,4 +10,6 @@ WORKDIR /
 COPY --from=builder /app/bin/app /app
 COPY --from=builder /app/config /config
 EXPOSE 8080
+EXPOSE 9000
+
 CMD ["/app"]

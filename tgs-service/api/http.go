@@ -2,7 +2,6 @@ package api
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
 	"time"
 
@@ -89,5 +88,5 @@ func (httpApi *HttpApi) getNextToken(w http.ResponseWriter, r *http.Request) {
 func (httpApi *HttpApi) Run() {
 	httpApi.Router.HandleFunc("/health", httpApi.health).Methods("GET")
 	httpApi.handleRoutesV1()
-	log.Fatal(http.ListenAndServe(httpApi.config.Port, httpApi.Router))
+	httpApi.log.Fatal(http.ListenAndServe(httpApi.config.HTTP.Port, httpApi.Router))
 }

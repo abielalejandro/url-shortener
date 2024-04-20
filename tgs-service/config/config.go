@@ -10,7 +10,9 @@ type (
 	// Config -.
 	Config struct {
 		App     `yaml:"app"`
+		Api     `yaml:"api"`
 		HTTP    `yaml:"http"`
+		RPC     `yaml:"rcp"`
 		Log     `yaml:"logger"`
 		Storage `yaml:"storage"`
 		Token   `yaml:"token"`
@@ -27,6 +29,10 @@ type (
 		Port string `env-required:"true" yaml:"port" env:"HTTP_PORT"`
 	}
 
+	RPC struct {
+		Port string `env-required:"true" yaml:"port" env:"RPC_PORT"`
+	}
+
 	// Log -.
 	Log struct {
 		Level string `env-required:"true" yaml:"log_level"   env:"LOG_LEVEL"`
@@ -36,6 +42,11 @@ type (
 		Type  string `env-required:"true" yaml:"type"  env:"STORAGE_TYPE" env-default: "generic"`
 		Redis Redis  `yaml:"redis"`
 	}
+
+	Api struct {
+		Type string `env-required:"true" yaml:"type"  env:"API_TYPE" env-default: "http"`
+	}
+
 	// Redis -.
 	Redis struct {
 		Addr         string `yaml:"addr" env:"REDIS_HOST" env-default:"localhost:6379"`

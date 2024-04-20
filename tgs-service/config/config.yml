@@ -5,12 +5,18 @@ app:
 http:
   port: ':8080'
 
+rcp:
+  port: ':9000'
+
 logger:
   log_level: 'debug'
 
 storage:
   type: generic
 
+api:
+  type: http
+  
 redis:
   addr: 'localhost:6379'
   password: ''

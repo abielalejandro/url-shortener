@@ -18,5 +18,4 @@ func main() {
 
 	app := app.NewApp(cfg)
 	app.Run()
-	log.Println(cfg)
 }

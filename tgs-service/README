@@ -1,0 +1,4 @@
+grpcurl -plaintext localhost:9000 api.TgsService/Next
+grpcurl -plaintext localhost:9000 api.TgsService/Health
+
+http http://localhost:8080/api/v1/next

@@ -1,6 +1,8 @@
 package app
 
 import (
+	"fmt"
+
 	"github.com/abielalejandro/tgs-service/api"
 	"github.com/abielalejandro/tgs-service/config"
 	"github.com/abielalejandro/tgs-service/internals/services"
@@ -12,7 +14,7 @@ type App struct {
 	storage.Storage
 	*config.Config
 	*services.TgsService
-	*api.HttpApi
+	api.Api
 }
 
 func NewApp(config *config.Config) *App {
@@ -21,14 +23,14 @@ func NewApp(config *config.Config) *App {
 		Config:     config,
 		Storage:    storage.NewStorage(config),
 		TgsService: svc,
-		HttpApi:    api.NewHttpApi(config, svc),
+		Api:        api.NewApi(config, svc),
 	}
 }
 
 func (app *App) Run() {
 	l := logger.New(app.Config.Log.Level)
-	l.Info("App Running")
+	l.Info(fmt.Sprintf("App Running WITH %s", app.Config.Api.Type))
 
 	app.TgsService.GenerateRange(app.Storage)
-	app.HttpApi.Run()
+	app.Api.Run()
 }

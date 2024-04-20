@@ -17,4 +17,6 @@ COPY --from=builder /app/service.consul.hcl.tpl /service.consul.hcl.tpl
 COPY --from=builder /app/docker/entry-point.sh /entry-point.sh
 RUN chmod a+x /entry-point.sh
 EXPOSE 8080
+EXPOSE 9000
+
 CMD ["/entry-point.sh"]
