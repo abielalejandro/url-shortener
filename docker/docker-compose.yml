@@ -4,6 +4,10 @@ services:
     container_name: consul-server
     hostname: consul-server
     restart: always
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
+      - 10.50.0.2
     environment:
       - CONSUL_ALLOW_PRIVILEGED_PORTS    
     volumes:
@@ -21,6 +25,7 @@ services:
   redis:
     image: redis:6.0-alpine
     restart: always
+    container_name: redis-server
     ports:
       - "6379:6379"
     volumes:
@@ -30,20 +35,17 @@ services:
       
   tgs_service:
     restart: on-failure
-    environment:
-      - CONSUL_HTTP_ADDR=10.50.0.2:8500
     build:
       context: ../tgs-service
-      dockerfile: Dockerfile.consul
+      dockerfile: ./docker/Dockerfile.consul
+    dns:
+      - 10.50.0.2
+    cap_add:
+      - "NET_ADMIN"
     volumes:
      - ./consul/client.json:/etc/consul.d/client.json:ro
     networks:
       - shortener
-    ports:
-      - "8080:8080"      
-    #depends_on:
-    #  consul:
-    #    condition: service_healthy
   #shortener_service:
   #  build:
   #    context: ../shortener-service
