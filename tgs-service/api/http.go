@@ -65,6 +65,12 @@ func NewHttpApi(config *config.Config, svc services.Service) *HttpApi {
 func (httpApi *HttpApi) handleRoutesV1() {
 	subrouter := httpApi.Router.PathPrefix("/api/v1").Subrouter()
 	subrouter.HandleFunc("/next", httpApi.getNextToken).Methods("GET")
+
+}
+
+func (httpApi *HttpApi) health(w http.ResponseWriter, r *http.Request) {
+	payload := &GeneralResponse{Success: true, Data: "UP", Timestamp: time.Now().UnixMilli()}
+	sendResponse(w, http.StatusOK, payload)
 }
 
 func (httpApi *HttpApi) getNextToken(w http.ResponseWriter, r *http.Request) {
@@ -81,6 +87,7 @@ func (httpApi *HttpApi) getNextToken(w http.ResponseWriter, r *http.Request) {
 }
 
 func (httpApi *HttpApi) Run() {
+	httpApi.Router.HandleFunc("/health", httpApi.health).Methods("GET")
 	httpApi.handleRoutesV1()
 	log.Fatal(http.ListenAndServe(httpApi.config.Port, httpApi.Router))
 }

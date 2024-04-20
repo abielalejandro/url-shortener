@@ -1,0 +1,64 @@
+services:
+  consul:
+    image: hashicorp/consul:1.15.4
+    container_name: consul-server
+    hostname: consul-server
+    restart: always
+    environment:
+      - CONSUL_ALLOW_PRIVILEGED_PORTS    
+    volumes:
+     - ./consul/server.json:/etc/consul.d/server.json:ro
+    networks:
+      shortener:
+        ipv4_address: 10.50.0.2
+    ports:
+      - "8500:8500"
+      - "8600:8600/tcp"
+      - "8600:8600/udp"
+    command: "agent -config-file /etc/consul.d/server.json"
+
+  # Redis storage for state persistence
+  redis:
+    image: redis:6.0-alpine
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - "redisdata:/data"
+    networks:
+      - shortener
+      
+  tgs_service:
+    restart: on-failure
+    environment:
+      - CONSUL_HTTP_ADDR=10.50.0.2:8500
+    build:
+      context: ../tgs-service
+      dockerfile: Dockerfile.consul
+    volumes:
+     - ./consul/client.json:/etc/consul.d/client.json:ro
+    networks:
+      - shortener
+    ports:
+      - "8080:8080"      
+    #depends_on:
+    #  consul:
+    #    condition: service_healthy
+  #shortener_service:
+  #  build:
+  #    context: ../shortener-service
+  #    dockerfile: Dockerfile
+  #  ports:
+  #    - "8080:8080"       
+  #  networks:
+  #    - shortener
+
+networks:
+  shortener:
+    ipam:
+      config:
+        - subnet: 10.50.0.0/16
+    driver: bridge
+
+volumes:
+  redisdata:

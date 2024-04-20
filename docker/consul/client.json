@@ -1,0 +1,20 @@
+{
+    "datacenter": "dc1",
+    "data_dir": "/opt/consul",
+    "domain": "consul",
+    "enable_syslog": true,
+    "leave_on_terminate": true,
+    "log_level": "INFO",
+    "rejoin_after_leave": true,
+    "disable_keyring_file": true,
+    "start_join": ["10.50.0.2"],
+    "retry_join": ["10.50.0.2"],
+    "server": false,
+    "connect": {
+      "enabled": true
+    },
+    "ports": {
+      "grpc": 8502
+    }   
+  }
+  
