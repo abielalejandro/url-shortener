@@ -1,0 +1,23 @@
+app:
+  name: 'shortener-service'
+  version: '0.0.1'
+  domain: 'rjgc.one'
+
+http:
+  port: ':8080'
+
+logger:
+  log_level: 'debug'
+
+storage:
+  type: generic
+  addr: 'localhost'
+  port: '7000'
+  password: ''
+  user: ''
+  db: 'shortener'
+
+redis:
+  addr: 'localhost:6379'
+  password: ''
+  db: 0
