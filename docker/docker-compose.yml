@@ -38,8 +38,12 @@ services:
     build:
       context: ../tgs-service
       dockerfile: ./docker/Dockerfile.consul
+      args:
+        PORT: $PORT  
     dns:
       - 10.50.0.2
+    environment:
+      - API_TYPE=$API_TYPE    
     cap_add:
       - "NET_ADMIN"
     volumes:

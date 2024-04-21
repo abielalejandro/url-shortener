@@ -6,10 +6,10 @@ COPY . ./
 RUN CGO_ENABLED=0 GOOS=linux go build -o bin ./...
 
 FROM golang:1.22-alpine3.19
+ARG PORT=8080
 WORKDIR /
 COPY --from=builder /app/bin/app /app
 COPY --from=builder /app/config /config
-EXPOSE 8080
-EXPOSE 9000
+EXPOSE $PORT
 
 CMD ["/app"]
