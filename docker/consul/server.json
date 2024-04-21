@@ -16,17 +16,20 @@
     "connect": {
         "enabled": true
     },
+    "ports": {
+        "dns": 53
+    },    
     "service": {
         "id": "dns",
         "name": "dns",
         "tags": ["primary"],
         "address": "localhost",
-        "port": 8600,
+        "port": 53,
         "enable_tag_override": false,
         "check": {
           "id": "dns",
-          "name": "Consul DNS TCP on port 8600",
-          "tcp": "localhost:8600",
+          "name": "Consul DNS TCP on port 53",
+          "tcp": "localhost:53",
           "interval": "10s",
           "timeout": "1s"
         }

@@ -7,14 +7,14 @@ services:
     dns:
       - 8.8.8.8
       - 1.1.1.1
-      - 10.50.0.2
+      - 10.50.0.100
     environment:
       - CONSUL_ALLOW_PRIVILEGED_PORTS    
     volumes:
      - ./consul/server.json:/etc/consul.d/server.json:ro
     networks:
       shortener:
-        ipv4_address: 10.50.0.2
+        ipv4_address: 10.50.0.100
     ports:
       - "8500:8500"
       - "8600:8600/tcp"
@@ -31,7 +31,8 @@ services:
     volumes:
       - "redisdata:/data"
     networks:
-      - shortener
+      shortener:
+        ipv4_address: 10.50.0.200
       
   tgs_service:
     restart: on-failure
@@ -39,13 +40,12 @@ services:
       context: ../tgs-service
       dockerfile: ./docker/Dockerfile.consul
       args:
-        PORT: $PORT  
+        PORT: $PORT
     dns:
-      - 10.50.0.2
+      - 10.50.0.100
     environment:
-      - API_TYPE=$API_TYPE    
-    cap_add:
-      - "NET_ADMIN"
+      - API_TYPE=$API_TYPE
+      - REDIS_HOST=10.50.0.200:6379
     volumes:
      - ./consul/client.json:/etc/consul.d/client.json:ro
     networks:
@@ -64,7 +64,5 @@ networks:
     ipam:
       config:
         - subnet: 10.50.0.0/16
-    driver: bridge
-
 volumes:
   redisdata:

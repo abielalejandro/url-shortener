@@ -1,21 +1,46 @@
 package storage
 
-import "github.com/abielalejandro/tgs-service/config"
+import (
+	"context"
+	"fmt"
+
+	"github.com/abielalejandro/tgs-service/config"
+	"github.com/abielalejandro/tgs-service/pkg/logger"
+	"github.com/redis/go-redis/v9"
+)
 
 type RedisStorage struct {
-	Config *config.Config
-}
-
-func (storage *RedisStorage) Connect() error {
-	return nil
+	config *config.Config
+	client *redis.Client
+	log    *logger.Logger
 }
 
 func (storage *RedisStorage) GetNext(sequenceName string) (int, error) {
-	return 1, nil
+	ctx := context.Background()
+
+	next, err := storage.client.Incr(ctx, storage.config.Redis.SequenceName).Result()
+	if err != nil {
+		storage.log.Error("GetNext:Get")
+		storage.log.Error(err)
+		return 0, err
+	}
+
+	storage.log.Info(fmt.Sprintf("GetNext %v", next))
+
+	return int(next), nil
 }
 
 func NewRedisStorage(config *config.Config) Storage {
+
+	client := redis.NewClient(&redis.Options{
+		Addr:     config.Redis.Addr,
+		Password: config.Redis.Password,
+		DB:       config.Redis.Db,
+	})
+
 	return &RedisStorage{
-		Config: config,
+		config: config,
+		client: client,
+		log:    logger.New(config.Log.Level),
 	}
 }

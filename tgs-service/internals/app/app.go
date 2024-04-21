@@ -18,10 +18,11 @@ type App struct {
 }
 
 func NewApp(config *config.Config) *App {
-	svc := services.NewTgsService(config)
+	storage := storage.NewStorage(config)
+	svc := services.NewTgsService(config, storage)
 	return &App{
 		Config:     config,
-		Storage:    storage.NewStorage(config),
+		Storage:    storage,
 		TgsService: svc,
 		Api:        api.NewApi(config, svc),
 	}
@@ -30,7 +31,7 @@ func NewApp(config *config.Config) *App {
 func (app *App) Run() {
 	l := logger.New(app.Config.Log.Level)
 	l.Info(fmt.Sprintf("App Running WITH %s", app.Config.Api.Type))
-
-	app.TgsService.GenerateRange(app.Storage)
+	l.Info(fmt.Sprintf("Config %v", app.Config))
+	app.TgsService.GenerateRange()
 	app.Api.Run()
 }

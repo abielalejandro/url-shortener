@@ -51,7 +51,7 @@ type (
 	Redis struct {
 		Addr         string `yaml:"addr" env:"REDIS_HOST" env-default:"localhost:6379"`
 		Password     string `env:"REDIS_PWD" env-default:""`
-		Db           string `env:"REDIS_DB" env-default:"0"`
+		Db           int    `env:"REDIS_DB" env-default:"0"`
 		SequenceName string `env:"REDIS_SEQUENCE_NAME" env-default:"tgs"`
 	}
 	Token struct {
