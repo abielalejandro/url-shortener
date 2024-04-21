@@ -15,7 +15,10 @@ storage:
   port: '7000'
   password: ''
   user: ''
-  db: 'shortener'
+  db: 'shortener'  
+
+cache_storage:
+  type: redis
 
 redis:
   addr: 'localhost:6379'
