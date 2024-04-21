@@ -15,7 +15,7 @@ type GenericCacheStorage struct {
 	limiter     map[string]int
 }
 
-func (storage *GenericCacheStorage) Add(key string, val string) error {
+func (storage *GenericCacheStorage) Add(key string, val string, minutesToExpire int) error {
 	storage.cache[key] = val
 	return nil
 }

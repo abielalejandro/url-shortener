@@ -13,7 +13,7 @@ func NewStorage(config *config.Config) Storage {
 }
 
 type CacheStorage interface {
-	Add(key string, val string) error
+	Add(key string, val string, minutesToExpire int) error
 	AddFilter(key string, val string) error
 	Exists(key string) (bool, error)
 	ExistsByFilter(key string) (bool, error)

@@ -14,6 +14,7 @@ type (
 		Log          `yaml:"logger"`
 		Storage      `yaml:"storage"`
 		CacheStorage `yaml:"cache_storage"`
+		RateLimiter  `yaml:"rate_limiter"`
 	}
 
 	// App -.
@@ -53,6 +54,11 @@ type (
 		Password     string `env:"REDIS_PWD" env-default:""`
 		Db           int    `env:"REDIS_DB" env-default:"0"`
 		SequenceName string `env:"REDIS_SEQUENCE_NAME" env-default:"tgs"`
+	}
+
+	RateLimiter struct {
+		MaxRequests         int `yaml:"max_request" env:"RATE_LIMITER_MAX_REQUEST" env-default:"20"`
+		WindowTimeInSeconds int `yaml:"max_request_window_time_seconds" env:"RATE_LIMITER_WINDOW_TIME_SENCONDS" env-default:"60"`
 	}
 )
 

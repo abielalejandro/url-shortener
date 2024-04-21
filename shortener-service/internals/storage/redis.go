@@ -17,10 +17,10 @@ type RedisStorage struct {
 	log    *logger.Logger
 }
 
-func (storage *RedisStorage) Add(key string, val string) error {
+func (storage *RedisStorage) Add(key string, val string, minutesToExpire int) error {
 	ctx := context.Background()
-
-	next, err := storage.client.Set(ctx, key, val, redis.KeepTTL).Result()
+	expiration, _ := time.ParseDuration(fmt.Sprintf("%vm", minutesToExpire))
+	next, err := storage.client.Set(ctx, key, val, expiration).Result()
 	if err != nil {
 		storage.log.Error("Add")
 		storage.log.Error(err)
