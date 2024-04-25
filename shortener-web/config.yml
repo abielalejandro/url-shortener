@@ -1,0 +1,11 @@
+app:
+  name: 'shortener-web'
+  version: '0.0.1'
+  domain: 'http://rjgc.one'
+
+http:
+  port: ':8080'
+
+shortener_service:
+  addr: "http://localhost:8080"
+  version: "v1"
