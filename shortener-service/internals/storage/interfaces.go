@@ -1,28 +1,42 @@
 package storage
 
-import "github.com/abielalejandro/shortener-service/config"
+import (
+	"context"
+
+	"github.com/abielalejandro/shortener-service/config"
+)
 
 type Storage interface {
-	ExistsByShortUrl(key string) (bool, error)
-	Create(url string, shortUrl string) (bool, error)
-	GetUrlByShortUrl(shortUrl string) (string, error)
+	ExistsByShort(ctx context.Context, key string) (bool, error)
+	Create(ctx context.Context, url *Url) (bool, error)
+	Update(ctx context.Context, url *Url) (bool, error)
+	GetUrlByShort(ctx context.Context, shortUrl string) (*Url, error)
+	GetUrlByLong(ctx context.Context, longUrl string) (*Url, error)
 }
 
 func NewStorage(config *config.Config) Storage {
-	return nil
+	switch config.Storage.Type {
+	case "generic":
+		return NewGenericStorage(config)
+	case "cassandra":
+		return NewCassandraStorage(config)
+	default:
+		return NewGenericStorage(config)
+	}
 }
 
 type CacheStorage interface {
-	Add(key string, val string, minutesToExpire int) error
-	AddFilter(key string, val string) error
-	Exists(key string) (bool, error)
-	ExistsByFilter(key string) (bool, error)
-	IsRateLimiterValid(key string, limit int, minutes int) (bool, error)
+	Add(ctx context.Context, key string, val string, minutesToExpire int) error
+	AddFilter(ctx context.Context, key string, val string) error
+	Exists(ctx context.Context, key string) (bool, error)
+	Get(ctx context.Context, key string) (string, error)
+	ExistsByFilter(ctx context.Context, key string, val string) (bool, error)
+	IsRateLimiterValid(ctx context.Context, key string, limit int, minutes int) (bool, error)
 }
 
 func NewCacheStorage(config *config.Config) CacheStorage {
 
-	switch config.Storage.Type {
+	switch config.CacheStorage.Type {
 	case "generic":
 		return NewGenericCacheStorage(config)
 	case "redis":

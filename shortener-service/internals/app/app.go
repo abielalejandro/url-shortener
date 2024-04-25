@@ -12,26 +12,28 @@ import (
 
 type App struct {
 	storage.Storage
+	storage.CacheStorage
 	*config.Config
-	*services.TgsService
+	*services.ShortenerService
 	api.Api
 }
 
 func NewApp(config *config.Config) *App {
-	storage := storage.NewStorage(config)
-	svc := services.NewTgsService(config, storage)
+	db := storage.NewStorage(config)
+	cache := storage.NewCacheStorage(config)
+	svc := services.NewShortenerService(config, db, cache)
+	rate := services.NewRateLimiterService(cache)
 	return &App{
-		Config:     config,
-		Storage:    storage,
-		TgsService: svc,
-		Api:        api.NewApi(config, svc),
+		Config:           config,
+		Storage:          db,
+		CacheStorage:     cache,
+		ShortenerService: svc,
+		Api:              api.NewApi(config, svc, rate),
 	}
 }
 
 func (app *App) Run() {
 	l := logger.New(app.Config.Log.Level)
-	l.Info(fmt.Sprintf("App Running WITH %s", app.Config.Api.Type))
 	l.Info(fmt.Sprintf("Config %v", app.Config))
-	app.TgsService.GenerateRange()
 	app.Api.Run()
 }

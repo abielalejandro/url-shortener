@@ -13,12 +13,14 @@ storage:
   type: generic
   addr: 'localhost'
   port: '7000'
-  password: ''
-  user: ''
+  password: 'admin'
+  user: 'admin'
   db: 'shortener'  
 
 cache_storage:
   type: redis
+  filter_name: longsurls
+  expire_time_minutes: 60
 
 redis:
   addr: 'localhost:6379'
@@ -28,3 +30,6 @@ redis:
 rate_limiter:
   max_request: 20
   max_request_window_time_seconds: 60
+
+tgs_service:
+  adr: "http://localhost:8081/api/v1/next"

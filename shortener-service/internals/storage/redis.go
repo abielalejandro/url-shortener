@@ -17,65 +17,57 @@ type RedisStorage struct {
 	log    *logger.Logger
 }
 
-func (storage *RedisStorage) Add(key string, val string, minutesToExpire int) error {
-	ctx := context.Background()
+func (cache *RedisStorage) Add(ctx context.Context, key string, val string, minutesToExpire int) error {
 	expiration, _ := time.ParseDuration(fmt.Sprintf("%vm", minutesToExpire))
-	next, err := storage.client.Set(ctx, key, val, expiration).Result()
+	next, err := cache.client.Set(ctx, key, val, expiration).Result()
 	if err != nil {
-		storage.log.Error("Add")
-		storage.log.Error(err)
+		cache.log.Error("Add")
+		cache.log.Error(err)
 		return err
 	}
 
-	storage.log.Info(fmt.Sprintf("GetNext %v", next))
+	cache.log.Info(fmt.Sprintf("Add %v", next))
 
 	return nil
 }
 
-func (storage *RedisStorage) AddFilter(key string, val string) error {
-	ctx := context.Background()
-
-	next, err := storage.client.BFAdd(ctx, key, val).Result()
+func (cache *RedisStorage) AddFilter(ctx context.Context, key string, val string) error {
+	next, err := cache.client.BFAdd(ctx, key, val).Result()
 	if err != nil {
-		storage.log.Error("BFAdd")
-		storage.log.Error(err)
+		cache.log.Error("BFAdd")
+		cache.log.Error(err)
 		return err
 	}
 
-	storage.log.Info(fmt.Sprintf("GetNext %v", next))
+	cache.log.Info(fmt.Sprintf("AddFilter %v", next))
 
 	return nil
 }
 
-func (storage *RedisStorage) Exists(key string) (bool, error) {
-	ctx := context.Background()
-
-	next, err := storage.client.Exists(ctx, key).Result()
+func (cache *RedisStorage) Exists(ctx context.Context, key string) (bool, error) {
+	next, err := cache.client.Exists(ctx, key).Result()
 	if err != nil {
-		storage.log.Error("Exists:Exists")
-		storage.log.Error(err)
+		cache.log.Error("Exists:Exists")
+		cache.log.Error(err)
 		return false, err
 	}
 
 	return next > 0, nil
 }
 
-func (storage *RedisStorage) ExistsByFilter(key string) (bool, error) {
-	ctx := context.Background()
-
-	var val string
-	next, err := storage.client.BFExists(ctx, key, val).Result()
+func (cache *RedisStorage) ExistsByFilter(ctx context.Context, key string, val string) (bool, error) {
+	next, err := cache.client.BFExists(ctx, key, val).Result()
 	if err != nil {
-		storage.log.Error("ExistsByFilter:BFExists")
-		storage.log.Error(err)
+		cache.log.Error("ExistsByFilter:BFExists")
+		cache.log.Error(err)
 		return false, err
 	}
 
 	return next, nil
 }
 
-func (storage *RedisStorage) saveLimiter(ctx context.Context, key string, duration time.Duration) error {
-	_, err := storage.client.TxPipelined(ctx, func(pipe redis.Pipeliner) error {
+func (cache *RedisStorage) saveLimiter(ctx context.Context, key string, duration time.Duration) error {
+	_, err := cache.client.TxPipelined(ctx, func(pipe redis.Pipeliner) error {
 
 		pipe.Incr(ctx, key)
 		pipe.Expire(ctx, key, duration)
@@ -90,35 +82,46 @@ func (storage *RedisStorage) saveLimiter(ctx context.Context, key string, durati
 	return nil
 }
 
-func (storage *RedisStorage) IsRateLimiterValid(key string, limit int, minutes int) (bool, error) {
-	ctx := context.Background()
-
+func (cache *RedisStorage) IsRateLimiterValid(ctx context.Context, key string, limit int, minutes int) (bool, error) {
 	var err error
 	var sequence string
 	var val int
 
 	duration, _ := time.ParseDuration(fmt.Sprintf("%vm", minutes))
 	condition := fmt.Sprintf("%v:%v", key, minutes)
-	err = storage.saveLimiter(ctx, condition, duration)
+	cache.log.Info(fmt.Sprintf("condition %v", condition))
+	cache.log.Info(fmt.Sprintf("duration %v", duration))
+	err = cache.saveLimiter(ctx, condition, duration)
 	if err != nil {
-		storage.log.Error("IsRateLimiterValid:saveLimiter")
-		storage.log.Error(err)
+		cache.log.Error("IsRateLimiterValid:saveLimiter")
+		cache.log.Error(err)
 		return false, nil
 	}
 
-	sequence, err = storage.client.Get(ctx, condition).Result()
+	sequence, err = cache.client.Get(ctx, condition).Result()
 	if err != nil {
-		storage.log.Error("IsRateLimiterValid:Get")
-		storage.log.Error(err)
+		cache.log.Error("IsRateLimiterValid:Get")
+		cache.log.Error(err)
 		return false, err
 	}
 
+	cache.log.Info(fmt.Sprintf("sequence %v", sequence))
 	val, err = strconv.Atoi(sequence)
 	if err != nil {
 		return false, nil
 	}
 
 	return val <= limit, nil
+}
+
+func (cache *RedisStorage) Get(ctx context.Context, key string) (string, error) {
+	val, err := cache.client.Get(ctx, key).Result()
+	if err != nil {
+		cache.log.Error("Get")
+		cache.log.Error(err)
+		return "", err
+	}
+	return val, nil
 }
 
 func NewRedisStorage(config *config.Config) CacheStorage {

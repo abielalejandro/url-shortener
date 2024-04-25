@@ -1,78 +1,73 @@
 package services
 
 import (
-	"crypto/rand"
-	"math"
-	rnd "math/rand"
-	"strconv"
+	"context"
+	"time"
 
 	"github.com/abielalejandro/shortener-service/config"
 	"github.com/abielalejandro/shortener-service/internals/storage"
 	"github.com/abielalejandro/shortener-service/pkg/logger"
 	"github.com/abielalejandro/shortener-service/pkg/utils"
-	"go.uber.org/atomic"
 )
 
 type Service interface {
-	GenerateToken() (string, error)
+	GenerateShort(url string) (string, error)
+	SearchUrlByShort(url string) (string, error)
 }
 
-type Range struct {
-	Min int
-	Max int
-}
-
-type TgsService struct {
+type ShortenerService struct {
 	config       *config.Config
 	log          *logger.Logger
-	rng          *Range
-	atom         atomic.Uint32
 	storage      storage.Storage
 	cachestorage storage.CacheStorage
 }
 
-func NewTgsService(config *config.Config, storage storage.Storage, cachestorage storage.CacheStorage) *TgsService {
-	return &TgsService{
+func NewShortenerService(config *config.Config,
+	storage storage.Storage,
+	cachestorage storage.CacheStorage) *ShortenerService {
+
+	return &ShortenerService{
 		config:       config,
 		log:          logger.New(config.Log.Level),
-		rng:          &Range{Min: 0, Max: 0},
 		storage:      storage,
 		cachestorage: cachestorage,
 	}
 }
 
-func (svc *TgsService) GenerateRange() {
-	next, err := svc.storage.GetNext("default")
+func (svc *ShortenerService) GenerateShort(longUrl string) (string, error) {
+	ctx := context.Background()
+	exists, err := svc.cachestorage.ExistsByFilter(ctx, svc.config.CacheStorage.FilterName, longUrl)
 	if err != nil {
-		svc.log.Error(err)
-		panic(err)
+		return "", err
+	}
+	short := utils.ToBase62(longUrl)
+	if !exists {
+		url := &storage.Url{Long: longUrl, Short: short, CreatedAt: time.Now(), LastVisited: time.Now(), ExpiresAt: time.Now()}
+		_, err = svc.storage.Create(ctx, url)
+
+		if err != nil {
+			return "", err
+		}
+		svc.cachestorage.AddFilter(ctx, svc.config.CacheStorage.FilterName, longUrl)
+		svc.cachestorage.Add(ctx, short, longUrl, svc.config.CacheStorage.ExpireTimeInMinutes)
 	}
 
-	factor := math.Pow10(svc.config.Token.Range)
-	minRange := next * int(factor)
-	maxRange := ((next+1)*int(factor) - 1)
-	svc.rng.Max = maxRange
-	svc.rng.Min = minRange
+	return short, nil
 }
 
-func (svc *TgsService) GenerateToken() (string, error) {
-	counter := svc.atom.Inc()
-	if int(counter) > (svc.rng.Max - svc.rng.Min) {
-		svc.atom.Store(1)
-		svc.GenerateRange()
+func (svc *ShortenerService) SearchUrlByShort(short string) (string, error) {
+	ctx := context.Background()
+	long, err := svc.cachestorage.Get(ctx, short)
+	if err == nil {
+		return long, nil
 	}
+	url, err := svc.storage.GetUrlByShort(ctx, short)
 
-	randomBytesToAdd := make([]byte, svc.config.Range)
-	rand.Read(randomBytesToAdd)
-
-	nextSeed := (rnd.Intn(svc.rng.Max - svc.rng.Min)) + svc.rng.Min
-	seedBytes := []byte(strconv.Itoa(nextSeed))
-	toTokenizer := make([]byte, svc.config.Range)
-
-	for i := 0; i < len(randomBytesToAdd); i++ {
-		toTokenizer[i] = seedBytes[i] + randomBytesToAdd[i]
+	if err != nil {
+		return "", err
 	}
-	next := string(toTokenizer[:])
-
-	return string(utils.ToBase62(next)[:(svc.config.Range + 1)]), nil
+	url.LastVisited = time.Now()
+	svc.storage.Update(ctx, url)
+	svc.cachestorage.Add(ctx, short, url.Long, svc.config.CacheStorage.ExpireTimeInMinutes)
+	return url.Long, nil
 }

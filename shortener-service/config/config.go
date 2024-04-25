@@ -15,6 +15,7 @@ type (
 		Storage      `yaml:"storage"`
 		CacheStorage `yaml:"cache_storage"`
 		RateLimiter  `yaml:"rate_limiter"`
+		TgsService   `yaml:"tgs_service"`
 	}
 
 	// App -.
@@ -38,27 +39,32 @@ type (
 		Type     string `yaml:"type" env-required:"true"  env:"STORAGE_TYPE" env-default: "generic"`
 		Addr     string `yaml:"addr"  env-required:"true" env:"DB_HOST" env-default:"localhost"`
 		Port     string `yaml:"port" env-required:"true"  env:"DB_PORT" env-default:"7000"`
-		Password string `yaml:"password" env-required:"true" env:"DB_PWD" env-default:""`
+		Password string `yaml:"password" env-required:"true" env:"DB_PWD" env-default:"admin"`
 		Db       string `yaml:"db"  env-required:"true" env:"DB_NAME" env-default:"shortener"`
-		Username string `yaml:"user" env-required:"true"  env:"DB_USER" env-default:""`
+		Username string `yaml:"user" env-required:"true"  env:"DB_USER" env-default:"admin"`
 	}
 
 	CacheStorage struct {
-		Type  string `env-required:"true" yaml:"type"  env:"CACHE_STORAGE_TYPE" env-default: "generic"`
-		Redis Redis  `yaml:"redis"`
+		Type                string `env-required:"true" yaml:"type"  env:"CACHE_STORAGE_TYPE" env-default: "generic"`
+		ExpireTimeInMinutes int    `env-required:"true" yaml:"expire_time_minutes"  env:"CACHE_STORAGE_EXPIRE_TIME_MINUTES" env-default: "60"`
+		FilterName          string `env-required:"true" yaml:"filter_name"  env:"CACHE_STORAGE_FILTER_NAME" env-default: "longurls"`
+		Redis               Redis  `yaml:"redis"`
 	}
 
 	// Redis -.
 	Redis struct {
-		Addr         string `yaml:"addr" env:"REDIS_HOST" env-default:"localhost:6379"`
-		Password     string `env:"REDIS_PWD" env-default:""`
-		Db           int    `env:"REDIS_DB" env-default:"0"`
-		SequenceName string `env:"REDIS_SEQUENCE_NAME" env-default:"tgs"`
+		Addr     string `yaml:"addr" env:"REDIS_HOST" env-default:"localhost:6379"`
+		Password string `env:"REDIS_PWD" env-default:""`
+		Db       int    `env:"REDIS_DB" env-default:"0"`
 	}
 
 	RateLimiter struct {
 		MaxRequests         int `yaml:"max_request" env:"RATE_LIMITER_MAX_REQUEST" env-default:"20"`
 		WindowTimeInSeconds int `yaml:"max_request_window_time_seconds" env:"RATE_LIMITER_WINDOW_TIME_SENCONDS" env-default:"60"`
+	}
+
+	TgsService struct {
+		Url string `yaml:"addr" env:"TGS_SERVICE_URL" env-default:"http://localhost:8081/api/v1/next"`
 	}
 )
 

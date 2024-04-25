@@ -14,12 +14,21 @@ type logMiddleware struct {
 	log    *logger.Logger
 }
 
-func (middleware *logMiddleware) GenerateToken() (token string, err error) {
+func (middleware *logMiddleware) GenerateShort(url string) (short string, err error) {
 	defer func(start time.Time) {
-		middleware.log.Info(fmt.Sprintf("Executing  GenerateToken %s takes %v", token, time.Since(start)))
+		middleware.log.Info(fmt.Sprintf("Executing  GenerateShort %s takes %v", short, time.Since(start)))
 	}(time.Now())
 
-	return middleware.next.GenerateToken()
+	return middleware.next.GenerateShort(url)
+}
+
+func (middleware *logMiddleware) SearchUrlByShort(short string) (url string, err error) {
+	defer func(start time.Time) {
+		middleware.log.Info(fmt.Sprintf("Executing  SearchUrlByShort %s takes %v", url, time.Since(start)))
+	}(time.Now())
+
+	return middleware.next.SearchUrlByShort(short)
+
 }
 
 func NewLogMiddleware(config *config.Config, next Service) Service {

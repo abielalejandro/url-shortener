@@ -23,17 +23,31 @@ services:
 
   # Redis storage for state persistence
   redis:
-    image: redis:6.0-alpine
+    image: redis/redis-stack
     restart: always
     container_name: redis-server
     ports:
       - "6379:6379"
+      - "8001:8001"
     volumes:
       - "redisdata:/data"
     networks:
       shortener:
         ipv4_address: 10.50.0.200
       
+  # Cassandra storage for state persistence
+  cassandra:
+    image: cassandra:latest
+    restart: always
+    container_name: cassandra-server
+    ports:
+      - "7000:7000"
+    volumes:
+      - "cassandradata:/var/lib/cassandra"
+    networks:
+      shortener:
+        ipv4_address: 10.50.0.201
+
   tgs_service:
     restart: on-failure
     build:
@@ -50,14 +64,21 @@ services:
      - ./consul/client.json:/etc/consul.d/client.json:ro
     networks:
       - shortener
-  #shortener_service:
-  #  build:
-  #    context: ../shortener-service
-  #    dockerfile: Dockerfile
-  #  ports:
-  #    - "8080:8080"       
-  #  networks:
-  #    - shortener
+
+  shortener_service:
+    build:
+      context: ../shortener-service
+      dockerfile: ./docker/Dockerfile.consul
+    dns:
+      - 10.50.0.100      
+    environment:
+      - REDIS_HOST=10.50.0.200:6379
+      - DB_HOST="10.50.0.201:7000"
+      - TGS_SERVICE_URL=http://tgs-service.service.consul/api/v1/next
+    volumes:
+     - ./consul/client.json:/etc/consul.d/client.json:ro    
+    networks:
+      - shortener
 
 networks:
   shortener:
@@ -66,3 +87,4 @@ networks:
         - subnet: 10.50.0.0/16
 volumes:
   redisdata:
+  cassandradata:

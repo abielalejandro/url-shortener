@@ -15,22 +15,22 @@ type GenericCacheStorage struct {
 	limiter     map[string]int
 }
 
-func (storage *GenericCacheStorage) Add(key string, val string, minutesToExpire int) error {
+func (storage *GenericCacheStorage) Add(ctx context.Context, key string, val string, minutesToExpire int) error {
 	storage.cache[key] = val
 	return nil
 }
 
-func (storage *GenericCacheStorage) AddFilter(key string, val string) error {
+func (storage *GenericCacheStorage) AddFilter(ctx context.Context, key string, val string) error {
 	storage.filterCache[key] = val
 	return nil
 }
 
-func (storage *GenericCacheStorage) Exists(key string) (bool, error) {
+func (storage *GenericCacheStorage) Exists(ctx context.Context, key string) (bool, error) {
 	_, found := storage.cache[key]
 	return found, nil
 }
 
-func (storage *GenericCacheStorage) ExistsByFilter(key string) (bool, error) {
+func (storage *GenericCacheStorage) ExistsByFilter(ctx context.Context, key string, val string) (bool, error) {
 	_, found := storage.filterCache[key]
 	return found, nil
 }
@@ -45,8 +45,7 @@ func (storage *GenericCacheStorage) saveLimiter(ctx context.Context, key string,
 	return nil
 }
 
-func (storage *GenericCacheStorage) IsRateLimiterValid(key string, limit int, minutes int) (bool, error) {
-	ctx := context.Background()
+func (storage *GenericCacheStorage) IsRateLimiterValid(ctx context.Context, key string, limit int, minutes int) (bool, error) {
 	duration, _ := time.ParseDuration(fmt.Sprintf("%vm", minutes))
 	condition := fmt.Sprintf("%v:%v", key, minutes)
 
@@ -54,6 +53,14 @@ func (storage *GenericCacheStorage) IsRateLimiterValid(key string, limit int, mi
 	counter := storage.limiter[condition]
 
 	return counter <= limit, nil
+}
+
+func (storage *GenericCacheStorage) Get(ctx context.Context, key string) (string, error) {
+	found, _ := storage.Exists(ctx, key)
+	if !found {
+		return "", nil
+	}
+	return storage.cache[key], nil
 }
 
 func NewGenericCacheStorage(config *config.Config) CacheStorage {
