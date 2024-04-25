@@ -86,8 +86,6 @@ services:
       dockerfile: ./docker/Dockerfile.consul
     dns:
       - 10.50.0.100
-    ports:  
-      - "8080:8080"
     environment:
       - REDIS_HOST=10.50.0.200:6379
       - DB_HOST=10.50.0.201:9042
@@ -109,7 +107,31 @@ services:
         condition: service_healthy
       cassandra:
         condition: service_healthy
-
+  shortener_web:
+    restart: on-failure
+    build:
+      context: ../shortener-web
+      dockerfile: ./docker/Dockerfile.consul
+    dns:
+      - 10.50.0.100
+    ports:  
+      - "8080:8080"
+    environment:
+      - SHORTENER_SERVICE_URL=http://shortener-service.service.consul:8080
+      - SHORTENER_SERVICE_VERSION=v1
+    volumes:
+     - ./consul/client.json:/etc/consul.d/client.json:ro    
+    networks:
+      - shortener
+    healthcheck:
+      test: curl --fail http://localhost:8080/health || exit 1
+      interval: 40s
+      timeout: 30s
+      retries: 3
+      start_period: 60s
+    depends_on:
+      shortener_service:
+        condition: service_healthy
 networks:
   shortener:
     ipam:
