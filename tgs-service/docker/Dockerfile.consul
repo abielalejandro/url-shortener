@@ -9,7 +9,7 @@ FROM hashicorp/consul:1.15.4 as consul
 FROM golang:1.22-alpine3.19
 ARG PORT=8080
 WORKDIR /
-RUN apk add --update gettext
+RUN apk add --update gettext curl
 COPY --from=consul /bin/consul /bin/consul
 
 COPY --from=builder /app/bin/app /app

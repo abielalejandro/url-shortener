@@ -3,12 +3,14 @@ package api
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"time"
 
 	"github.com/abielalejandro/shortener-service/config"
 	"github.com/abielalejandro/shortener-service/internals/services"
+	"github.com/abielalejandro/shortener-service/internals/storage"
 	"github.com/abielalejandro/shortener-service/pkg/logger"
 	"github.com/abielalejandro/shortener-service/pkg/utils"
 	"github.com/go-playground/validator/v10"
@@ -100,13 +102,17 @@ func (httpApi *HttpApi) createShort(w http.ResponseWriter, r *http.Request) {
 	err = validate.Struct(body)
 	if err != nil {
 		validationErrors := err.(validator.ValidationErrors)
-		sendErrorResponse(w, http.StatusInternalServerError, validationErrors.Error())
+		sendErrorResponse(w, http.StatusBadRequest, validationErrors.Error())
 		return
 	}
 
 	token, err := httpApi.svc.GenerateShort(body.Url)
 	if err != nil {
-		sendErrorResponse(w, http.StatusInternalServerError, err.Error())
+		if errors.Is(err, &storage.NotFoundError{}) {
+			sendErrorResponse(w, http.StatusNotFound, err.Error())
+		} else {
+			sendErrorResponse(w, http.StatusInternalServerError, err.Error())
+		}
 		return
 	}
 
@@ -120,7 +126,12 @@ func (httpApi *HttpApi) searchUrlByShort(w http.ResponseWriter, r *http.Request)
 	id := vars["id"]
 	token, err := httpApi.svc.SearchUrlByShort(id)
 	if err != nil {
-		sendErrorResponse(w, http.StatusInternalServerError, err.Error())
+		if errors.Is(err, &storage.NotFoundError{}) {
+			sendErrorResponse(w, http.StatusNotFound, err.Error())
+		} else {
+			sendErrorResponse(w, http.StatusInternalServerError, err.Error())
+		}
+
 		return
 	}
 

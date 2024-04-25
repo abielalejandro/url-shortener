@@ -6,6 +6,12 @@ import (
 	"github.com/abielalejandro/shortener-service/config"
 )
 
+type NotFoundError struct{}
+
+func (err *NotFoundError) Error() string {
+	return "not found"
+}
+
 type Storage interface {
 	ExistsByShort(ctx context.Context, key string) (bool, error)
 	Create(ctx context.Context, url *Url) (bool, error)

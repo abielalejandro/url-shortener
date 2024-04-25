@@ -12,7 +12,7 @@ logger:
   log_level: 'debug'
 
 storage:
-  type: generic
+  type: redis
 
 api:
   type: http

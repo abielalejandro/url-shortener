@@ -7,7 +7,6 @@ import (
 	"github.com/abielalejandro/shortener-service/config"
 	"github.com/abielalejandro/shortener-service/internals/storage"
 	"github.com/abielalejandro/shortener-service/pkg/logger"
-	"github.com/abielalejandro/shortener-service/pkg/utils"
 )
 
 type Service interface {
@@ -20,28 +19,39 @@ type ShortenerService struct {
 	log          *logger.Logger
 	storage      storage.Storage
 	cachestorage storage.CacheStorage
+	tgsService   TgsService
 }
 
-func NewShortenerService(config *config.Config,
+func NewShortenerService(
+	config *config.Config,
 	storage storage.Storage,
-	cachestorage storage.CacheStorage) *ShortenerService {
+	cachestorage storage.CacheStorage,
+	tgsService TgsService,
+) *ShortenerService {
 
 	return &ShortenerService{
 		config:       config,
 		log:          logger.New(config.Log.Level),
 		storage:      storage,
 		cachestorage: cachestorage,
+		tgsService:   tgsService,
 	}
 }
 
 func (svc *ShortenerService) GenerateShort(longUrl string) (string, error) {
 	ctx := context.Background()
+	var short string
 	exists, err := svc.cachestorage.ExistsByFilter(ctx, svc.config.CacheStorage.FilterName, longUrl)
 	if err != nil {
 		return "", err
 	}
-	short := utils.ToBase62(longUrl)
+
 	if !exists {
+		short, err = svc.tgsService.Next(longUrl)
+		if err != nil {
+			return "", err
+		}
+
 		url := &storage.Url{Long: longUrl, Short: short, CreatedAt: time.Now(), LastVisited: time.Now(), ExpiresAt: time.Now()}
 		_, err = svc.storage.Create(ctx, url)
 
@@ -50,6 +60,12 @@ func (svc *ShortenerService) GenerateShort(longUrl string) (string, error) {
 		}
 		svc.cachestorage.AddFilter(ctx, svc.config.CacheStorage.FilterName, longUrl)
 		svc.cachestorage.Add(ctx, short, longUrl, svc.config.CacheStorage.ExpireTimeInMinutes)
+	} else {
+		url, err := svc.storage.GetUrlByLong(ctx, longUrl)
+		if err != nil {
+			return "", err
+		}
+		short = url.Short
 	}
 
 	return short, nil

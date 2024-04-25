@@ -15,13 +15,15 @@ type App struct {
 	storage.CacheStorage
 	*config.Config
 	*services.ShortenerService
+	services.TgsService
 	api.Api
 }
 
 func NewApp(config *config.Config) *App {
 	db := storage.NewStorage(config)
 	cache := storage.NewCacheStorage(config)
-	svc := services.NewShortenerService(config, db, cache)
+	tgsService := services.NewTgsService(config)
+	svc := services.NewShortenerService(config, db, cache, tgsService)
 	rate := services.NewRateLimiterService(cache)
 	return &App{
 		Config:           config,
@@ -29,6 +31,7 @@ func NewApp(config *config.Config) *App {
 		CacheStorage:     cache,
 		ShortenerService: svc,
 		Api:              api.NewApi(config, svc, rate),
+		TgsService:       services.NewTgsService(config),
 	}
 }
 

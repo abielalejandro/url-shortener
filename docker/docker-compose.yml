@@ -34,19 +34,24 @@ services:
     networks:
       shortener:
         ipv4_address: 10.50.0.200
-      
+    healthcheck:
+      test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
+
   # Cassandra storage for state persistence
   cassandra:
     image: cassandra:latest
     restart: always
     container_name: cassandra-server
     ports:
+      - "9042:9042"
       - "7000:7000"
     volumes:
       - "cassandradata:/var/lib/cassandra"
     networks:
       shortener:
         ipv4_address: 10.50.0.201
+    healthcheck:
+      test: [ "CMD", "nodetool", "status" ]
 
   tgs_service:
     restart: on-failure
@@ -64,21 +69,46 @@ services:
      - ./consul/client.json:/etc/consul.d/client.json:ro
     networks:
       - shortener
+    healthcheck:
+      test: curl --fail http://localhost:8080/health || exit 1
+      interval: 40s
+      timeout: 30s
+      retries: 3
+      start_period: 60s
+    depends_on:
+      redis:
+        condition: service_healthy
 
   shortener_service:
+    restart: on-failure
     build:
       context: ../shortener-service
       dockerfile: ./docker/Dockerfile.consul
     dns:
-      - 10.50.0.100      
+      - 10.50.0.100
+    ports:  
+      - "8080:8080"
     environment:
       - REDIS_HOST=10.50.0.200:6379
-      - DB_HOST="10.50.0.201:7000"
-      - TGS_SERVICE_URL=http://tgs-service.service.consul/api/v1/next
+      - DB_HOST=10.50.0.201:9042
+      - TGS_SERVICE_URL=http://tgs-service.service.consul:8080/api/v1/next
     volumes:
      - ./consul/client.json:/etc/consul.d/client.json:ro    
     networks:
       - shortener
+    healthcheck:
+      test: curl --fail http://localhost:8080/health || exit 1
+      interval: 40s
+      timeout: 30s
+      retries: 3
+      start_period: 60s
+    depends_on:
+      tgs_service:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      cassandra:
+        condition: service_healthy
 
 networks:
   shortener:
@@ -87,4 +117,6 @@ networks:
         - subnet: 10.50.0.0/16
 volumes:
   redisdata:
+    name: redisdata
   cassandradata:
+    name: cassandradata
