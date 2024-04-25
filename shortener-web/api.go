@@ -11,7 +11,7 @@ import (
 
 type HtmlContextData struct {
 	Ok      bool
-	Message string
+	Message *string
 	Url     *string
 }
 
@@ -83,11 +83,12 @@ func (httpApi *HttpApi) homeHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (api *HttpApi) shortHandler(w http.ResponseWriter, r *http.Request) {
-	data := &HtmlContextData{Ok: true, Message: "", Url: nil}
+	data := &HtmlContextData{Ok: true, Message: nil, Url: nil}
 	err := r.ParseForm()
 	if err != nil {
+		msg := err.Error()
 		data.Ok = false
-		data.Message = err.Error()
+		data.Message = &msg
 		api.render(w, "templates/index.html", data)
 		return
 	}
@@ -96,15 +97,17 @@ func (api *HttpApi) shortHandler(w http.ResponseWriter, r *http.Request) {
 
 	short, err := api.svc.Create(url)
 	if err != nil {
+		msg := err.Error()
 		data.Ok = false
-		data.Message = err.Error()
+		data.Message = &msg
 		api.render(w, "templates/index.html", data)
 		return
 	}
 
+	msg := "Your short link was created successfuly"
 	shortGen := fmt.Sprintf("%v/%v", api.svc.config.App.Domain, short)
 	data.Ok = true
-	data.Message = "Your short link was created successfuly"
+	data.Message = &msg
 	data.Url = &shortGen
 	api.render(w, "templates/index.html", data)
 
@@ -115,8 +118,8 @@ func (api *HttpApi) searchShortHandler(w http.ResponseWriter, r *http.Request) {
 	id := vars["short"]
 	url, err := api.svc.Search(id)
 	if err != nil {
-		log.Printf("err %v", err.Error())
-		data := &HtmlContextData{Ok: false, Message: err.Error(), Url: nil}
+		msg := err.Error()
+		data := &HtmlContextData{Ok: false, Message: &msg, Url: nil}
 		api.render(w, "templates/index.html", data)
 		return
 	}

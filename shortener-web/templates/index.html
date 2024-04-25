@@ -27,12 +27,14 @@
     </header>
     <main class="content">
         <section  class="container">
+          {{if .Message}}
             <div class="notification is-light {{if .Ok}} is-primary {{else}} is-danger {{end}} ">
               <p>{{.Message}}</p>
               {{if .Url}}
               <p>{{.Url}}</p>
               {{end}}
             </div>
+          {{end}}
             <form method="POST" action="/short">
                 <div class="field">
                     <label class="label">Url</label>

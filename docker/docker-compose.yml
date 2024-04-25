@@ -119,6 +119,7 @@ services:
     environment:
       - SHORTENER_SERVICE_URL=http://shortener-service.service.consul:8080
       - SHORTENER_SERVICE_VERSION=v1
+      - APP_DOMAIN=http://127.0.0.1:8080
     volumes:
      - ./consul/client.json:/etc/consul.d/client.json:ro    
     networks:
