@@ -1,6 +1,7 @@
 
 # Token generation service
 It handle the sequence for the shorts tokens
+
 It has 2 communication apis: http rest (default) and grpc
 
 ## How to run
