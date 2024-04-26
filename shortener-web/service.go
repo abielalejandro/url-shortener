@@ -43,7 +43,7 @@ func NewShortenerService(
 	}
 }
 
-func (svc *ShortenerService) Create(longUrl string) (string, error) {
+func (svc *ShortenerService) Create(longUrl string, sourceIp string) (string, error) {
 	client := &http.Client{}
 	data := &ShortenerRequest{
 		Url: longUrl,
@@ -59,6 +59,9 @@ func (svc *ShortenerService) Create(longUrl string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	req.Header.Set("X-Real-Ip", sourceIp)
+	req.Header.Set("X-Forwarded-For", sourceIp)
+	req.Header.Set("X-URL-HASH", ToBase62(sourceIp))
 	res, err := client.Do(req)
 	if err != nil {
 		return "", err
@@ -88,7 +91,7 @@ func (svc *ShortenerService) Create(longUrl string) (string, error) {
 	return body.Data, nil
 }
 
-func (svc *ShortenerService) Search(short string) (string, error) {
+func (svc *ShortenerService) Search(short string, sourceIp string) (string, error) {
 	client := &http.Client{}
 
 	url := fmt.Sprintf("%v/api/%v/short/%v", svc.config.RestShortenerService.Url, svc.config.RestShortenerService.Version, short)
@@ -97,6 +100,9 @@ func (svc *ShortenerService) Search(short string) (string, error) {
 		return "", err
 	}
 	res, err := client.Do(req)
+	req.Header.Set("X-Real-Ip", sourceIp)
+	req.Header.Set("X-Forwarded-For", sourceIp)
+	req.Header.Set("X-URL-HASH", ToBase62(sourceIp))
 	if err != nil {
 		return "", err
 	}

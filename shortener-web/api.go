@@ -95,7 +95,7 @@ func (api *HttpApi) shortHandler(w http.ResponseWriter, r *http.Request) {
 
 	url := r.PostFormValue("url")
 
-	short, err := api.svc.Create(url)
+	short, err := api.svc.Create(url, ReadUserIP(r))
 	if err != nil {
 		msg := err.Error()
 		data.Ok = false
@@ -116,7 +116,7 @@ func (api *HttpApi) shortHandler(w http.ResponseWriter, r *http.Request) {
 func (api *HttpApi) searchShortHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["short"]
-	url, err := api.svc.Search(id)
+	url, err := api.svc.Search(id, ReadUserIP(r))
 	if err != nil {
 		msg := err.Error()
 		data := &HtmlContextData{Ok: false, Message: &msg, Url: nil}

@@ -79,7 +79,6 @@ func NewHttpApi(
 
 func (httpApi *HttpApi) handleRoutesV1() {
 	subrouter := httpApi.Router.PathPrefix("/api/v1").Subrouter()
-	subrouter.Use(httpApi.rateLimiterMiddleware)
 	subrouter.HandleFunc("/short", httpApi.createShort).Methods("POST")
 	subrouter.HandleFunc("/short/{id}", httpApi.searchUrlByShort).Methods("GET")
 }
@@ -165,6 +164,7 @@ func (httpApi *HttpApi) rateLimiterMiddleware(next http.Handler) http.Handler {
 }
 
 func (httpApi *HttpApi) Run() {
+	httpApi.Router.Use(httpApi.rateLimiterMiddleware)
 	httpApi.Router.HandleFunc("/health", httpApi.health).Methods("GET")
 	httpApi.handleRoutesV1()
 	httpApi.log.Fatal(http.ListenAndServe(httpApi.config.HTTP.Port, httpApi.Router))

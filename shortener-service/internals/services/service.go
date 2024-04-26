@@ -74,14 +74,20 @@ func (svc *ShortenerService) GenerateShort(longUrl string) (string, error) {
 func (svc *ShortenerService) SearchUrlByShort(short string) (string, error) {
 	ctx := context.Background()
 	long, err := svc.cachestorage.Get(ctx, short)
-	if err == nil {
+	if err != nil {
 		return long, nil
 	}
-	url, err := svc.storage.GetUrlByShort(ctx, short)
 
+	url, err := svc.storage.GetUrlByShort(ctx, short)
 	if err != nil {
 		return "", err
 	}
+
+	if url == nil {
+		err = &storage.NotFoundError{}
+		return "", err
+	}
+
 	url.LastVisited = time.Now()
 	svc.storage.Update(ctx, url)
 	svc.cachestorage.Add(ctx, short, url.Long, svc.config.CacheStorage.ExpireTimeInMinutes)

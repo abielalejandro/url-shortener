@@ -77,14 +77,13 @@ func (storage *CassandraStorage) GetUrlByLong(ctx context.Context, longUrl strin
 }
 
 func (storage *CassandraStorage) ExistsByShort(ctx context.Context, shortUrl string) (bool, error) {
-	query := "SELECT * FROM urls WHERE short=? LIMIT 1"
-	var record CUrl
-	ok := storage.Query(query, shortUrl).WithContext(ctx).Consistency(gocql.One).Iter().Scan(&record)
-	if !ok {
-		return false, &NotFoundError{}
+	url, err := storage.GetUrlByShort(ctx, shortUrl)
+	if err != nil {
+		return false, err
 	}
 
-	return ok, nil
+	return url != nil, nil
+
 }
 
 func (storage *CassandraStorage) Create(ctx context.Context, url *Url) (bool, error) {
@@ -109,19 +108,34 @@ func (storage *CassandraStorage) Update(ctx context.Context, url *Url) (bool, er
 }
 
 func (storage *CassandraStorage) GetUrlByShort(ctx context.Context, shortUrl string) (*Url, error) {
-	query := "SELECT * FROM urls WHERE short=? LIMIT 1"
-	var record CUrl
-	ok := storage.Query(query, shortUrl).WithContext(ctx).Consistency(gocql.One).Iter().Scan(&record)
+	var record Url
+	var (
+		short       string
+		long        string
+		lastVisited time.Time
+		createdAt   time.Time
+		expiresAt   time.Time
+	)
+	scanner := storage.Query(`SELECT short, long, created_at, expires_at, last_visited FROM urls WHERE short=?`,
+		shortUrl).WithContext(ctx).Iter().Scanner()
+	for scanner.Next() {
 
-	if !ok {
+		err := scanner.Scan(&short, &long, &createdAt, &expiresAt, &lastVisited)
+		if err != nil {
+			log.Fatal(err)
+			return nil, &NotFoundError{}
+		}
+		record.CreatedAt = createdAt
+		record.ExpiresAt = expiresAt
+		record.LastVisited = lastVisited
+		record.Long = long
+		record.Short = short
+	}
+
+	if err := scanner.Err(); err != nil {
+		log.Fatal(err)
 		return nil, &NotFoundError{}
 	}
 
-	return &Url{
-		Short:       record.Short,
-		Long:        record.Long,
-		LastVisited: record.LastVisited,
-		CreatedAt:   record.CreatedAt,
-		ExpiresAt:   record.ExpiresAt,
-	}, nil
+	return &record, nil
 }
