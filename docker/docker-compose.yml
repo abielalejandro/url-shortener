@@ -8,8 +8,6 @@ services:
       - 8.8.8.8
       - 1.1.1.1
       - 10.50.0.100
-    environment:
-      - CONSUL_ALLOW_PRIVILEGED_PORTS    
     volumes:
      - ./consul/server.json:/etc/consul.d/server.json:ro
     networks:
@@ -35,7 +33,7 @@ services:
       shortener:
         ipv4_address: 10.50.0.200
     healthcheck:
-      test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
+      test: [ "CMD", "redis-cli", "--raw", "ping"]
 
   # Cassandra storage for state persistence
   cassandra:
@@ -70,7 +68,7 @@ services:
     networks:
       - shortener
     healthcheck:
-      test: curl --fail http://localhost:8080/health || exit 1
+      test: grpcurl -plaintext localhost:9000 api.TgsService/Health
       interval: 40s
       timeout: 30s
       retries: 3
@@ -84,18 +82,21 @@ services:
     build:
       context: ../shortener-service
       dockerfile: ./docker/Dockerfile.consul
+      args:
+        PORT: $PORT
     dns:
       - 10.50.0.100
     environment:
       - REDIS_HOST=10.50.0.200:6379
       - DB_HOST=10.50.0.201:9042
-      - TGS_SERVICE_URL=http://tgs-service.service.consul:8080/api/v1/next
+      - TGS_SERVICE_URL=tgs-service.service.consul:9000
+      - TGS_SERVICE_URL=grpc
     volumes:
-     - ./consul/client.json:/etc/consul.d/client.json:ro    
+     - ./consul/client.json:/etc/consul.d/client.json:ro
     networks:
       - shortener
     healthcheck:
-      test: curl --fail http://localhost:8080/health || exit 1
+      test: grpcurl -plaintext localhost:9000 api.ShortenerService/Health
       interval: 40s
       timeout: 30s
       retries: 3

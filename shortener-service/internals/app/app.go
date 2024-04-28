@@ -37,6 +37,8 @@ func NewApp(config *config.Config) *App {
 
 func (app *App) Run() {
 	l := logger.New(app.Config.Log.Level)
+	l.Info(fmt.Sprintf("App Running WITH %s", app.Config.Api.Type))
 	l.Info(fmt.Sprintf("Config %v", app.Config))
+
 	app.Api.Run()
 }

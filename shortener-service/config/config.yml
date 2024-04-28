@@ -3,8 +3,14 @@ app:
   version: '0.0.1'
   domain: 'rjgc.one'
 
+api:
+  type: http
+  
 http:
   port: ':8080'
+
+grpc:
+  port: ':9000'
 
 logger:
   log_level: 'debug'

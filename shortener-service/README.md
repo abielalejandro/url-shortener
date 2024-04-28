@@ -25,7 +25,6 @@ go build -o bin ./...
 
 ### Example calls
 
-#### Create a short token
 
 #### Create a short token
 
@@ -37,9 +36,21 @@ curl --location 'http://localhost:8080/api/v1/short' \
 }'
 ```
 
+#### Create a short token with grpc
+```
+grpcurl -d '{"url": "http://www.google.com"}' -plaintext localhost:9000 api.ShortenerService/Create
+
+```
+
 #### Search the url by token
 ```
 curl --location 'http://localhost:8080/api/v1/short/REPLACE_WIT_TOKEN'
+
+```
+
+#### Search the url by token with grpc
+```
+grpcurl -d '{"url": "REPLACE_WIT_TOKEN"}' -plaintext localhost:9000 api.ShortenerService/Search
 
 ```
 
@@ -47,6 +58,12 @@ curl --location 'http://localhost:8080/api/v1/short/REPLACE_WIT_TOKEN'
 
 ```
 curl --location 'http://localhost:8080/health'
+```
+
+#### Health with grpc
+```
+grpcurl -plaintext localhost:9000 api.ShortenerService/Health
+
 ```
 
 

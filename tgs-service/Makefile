@@ -1,5 +1,5 @@
 HTTP_API_TYPE=http
-RPC_API_TYPE=rpc
+RPC_API_TYPE=grpc
 
 all: run
 

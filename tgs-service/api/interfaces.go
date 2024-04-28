@@ -14,7 +14,7 @@ func NewApi(config *config.Config, svc *services.TgsService) Api {
 	switch config.Api.Type {
 	case "http":
 		return NewHttpApi(config, svc)
-	case "rpc":
+	case "grpc":
 		return NewRpcApi(config, svc)
 	default:
 		return NewHttpApi(config, svc)

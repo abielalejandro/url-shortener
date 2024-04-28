@@ -54,7 +54,7 @@ func (rpcApi *RpcApi) Next(context.Context, *NextRequest) (*NextResponse, error)
 }
 
 func (rpcApi *RpcApi) Health(context.Context, *NextRequest) (*NextResponse, error) {
-	return &NextResponse{Token: "OK"}, nil
+	return &NextResponse{Token: "UP"}, nil
 }
 
 func (rpcApi *RpcApi) mustEmbedUnimplementedTgsServiceServer() {

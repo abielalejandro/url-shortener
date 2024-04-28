@@ -19,7 +19,7 @@ trap "deregister_runner" SIGQUIT
 
 envsubst < service.consul.hcl.tpl > /etc/consul.d/service.consul.hcl
 
-if [[ -n "$API_TYPE" ]] && [[ "$API_TYPE" == "rpc" ]]; 
+if [[ -n "$API_TYPE" ]] && [[ "$API_TYPE" == "grpc" ]]; 
 then  
   envsubst < service.consul.hcl.rpc.tpl > /etc/consul.d/service.consul.hcl
 fi

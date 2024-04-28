@@ -11,11 +11,13 @@ type (
 	Config struct {
 		App          `yaml:"app"`
 		HTTP         `yaml:"http"`
+		GRPC         `yaml:"grpc"`
 		Log          `yaml:"logger"`
 		Storage      `yaml:"storage"`
 		CacheStorage `yaml:"cache_storage"`
 		RateLimiter  `yaml:"rate_limiter"`
 		TgsService   `yaml:"tgs_service"`
+		Api          `yaml:"api"`
 	}
 
 	// App -.
@@ -23,6 +25,10 @@ type (
 		Name    string `env-required:"true" yaml:"name"    env:"APP_NAME"`
 		Version string `env-required:"true" yaml:"version" env:"APP_VERSION"`
 		Domain  string `env-required:"true" yaml:"domain" env:"APP_DOMAIN"`
+	}
+
+	GRPC struct {
+		Port string `env-required:"true" yaml:"port" env:"GRPC_PORT"`
 	}
 
 	// HTTP -.
@@ -66,6 +72,10 @@ type (
 	TgsService struct {
 		Url  string `yaml:"addr" env:"TGS_SERVICE_URL" env-default:"http://localhost:8080/api/v1/next"`
 		Type string `env-required:"true" yaml:"type"  env:"TGS_SERVICE_TYPE" env-default: "generic"`
+	}
+
+	Api struct {
+		Type string `env-required:"true" yaml:"type"  env:"API_TYPE" env-default: "http"`
 	}
 )
 

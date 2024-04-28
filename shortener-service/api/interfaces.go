@@ -10,5 +10,12 @@ type Api interface {
 }
 
 func NewApi(config *config.Config, svc services.Service, rate *services.RateService) Api {
-	return NewHttpApi(config, svc, rate)
+	switch config.Api.Type {
+	case "http":
+		return NewHttpApi(config, svc, rate)
+	case "grpc":
+		return NewGrpcApi(config, svc)
+	default:
+		return NewHttpApi(config, svc, rate)
+	}
 }

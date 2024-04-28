@@ -1,0 +1,33 @@
+syntax="proto3";
+
+package api;
+
+option go_package = "github.com/abielalejandro/shortener-service/api";
+
+message CreateRequest{
+  string url=1;
+}
+
+message CreateResponse {
+  string url=1;
+}
+
+message SearchRequest{
+  string url=1;
+}
+
+message SearchResponse {
+  string url=1;
+}
+
+message HealthRequest{}
+
+message HealthResponse {
+  string msg=1;
+}
+
+service ShortenerService {
+    rpc Search(SearchRequest) returns (SearchResponse) {}
+    rpc Create(CreateRequest) returns (CreateResponse) {}
+    rpc Health(HealthRequest) returns (HealthResponse) {}
+} 
