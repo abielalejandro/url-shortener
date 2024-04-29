@@ -1,6 +1,6 @@
 service = {
-  name = "shortener-service"
-  id = "shortener-service-${UUID}"
+  name = "shortener"
+  id = "shortener-${UUID}"
   port = 8080
   check = {
     id = "shortener-check"

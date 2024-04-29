@@ -1,1 +1,5 @@
 bin/app
+vendor
+shortener-service/vendor
+shortener-web/vendor
+tgs-service/vendor

@@ -29,6 +29,7 @@ type (
 	RestShortenerService struct {
 		Url     string `yaml:"addr" env:"SHORTENER_SERVICE_URL" env-default:"http://localhost:8080"`
 		Version string `yaml:"version" env:"SHORTENER_SERVICE_VERSION" env-default:"v1"`
+		Type    string `env-required:"true" yaml:"type"  env:"SHORTENER_SERVICE_TYPE" env-default: "http"`
 	}
 )
 

@@ -15,7 +15,7 @@ storage:
   type: redis
 
 api:
-  type: http
+  type: grpc
   
 redis:
   addr: 'localhost:6379'

@@ -5,7 +5,7 @@ import (
 )
 
 type Appl struct {
-	*ShortenerService
+	ShortenerService
 	*HttpApi
 	*Config
 }

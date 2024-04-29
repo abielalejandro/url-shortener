@@ -1,6 +1,6 @@
 service = {
-  name = "shortener-service-rpc"
-  id = "shortener-service-${UUID}"
+  name = "shortener"
+  id = "shortener-${UUID}"
   port = 9000
   check = {
     id = "shortener-check-rpc"

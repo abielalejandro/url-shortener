@@ -4,7 +4,7 @@ app:
   domain: 'rjgc.one'
 
 api:
-  type: http
+  type: grpc
   
 http:
   port: ':8080'
@@ -38,5 +38,5 @@ rate_limiter:
   max_request_window_time_seconds: 60
 
 tgs_service:
-  adr: "http://localhost:8081/api/v1/next"
-  type: http
+  adr: "localhost:9000"
+  type: grpc

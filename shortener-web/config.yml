@@ -7,5 +7,6 @@ http:
   port: ':8080'
 
 shortener_service:
-  addr: "http://localhost:8080"
+  addr: "localhost:9000"
   version: "v1"
+  type: grpc

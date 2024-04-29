@@ -6,6 +6,12 @@ It has 2 communication apis: http rest (default) and grpc
 
 ## How to run
 
+### Download dependencies
+```
+go mod download
+```
+
+
 ### Http api
 ```
 make run

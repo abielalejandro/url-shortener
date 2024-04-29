@@ -3,7 +3,6 @@ module github.com/abielalejandro/shortener-service
 go 1.19
 
 require (
-	github.com/abielalejandro/tgs-service v0.0.0-00010101000000-000000000000
 	github.com/go-playground/validator/v10 v10.19.0
 	github.com/gocql/gocql v1.6.0
 	github.com/gorilla/mux v1.8.1
@@ -27,7 +26,6 @@ require (
 	github.com/leodido/go-urn v1.4.0 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.19 // indirect
-	go.uber.org/atomic v1.11.0 // indirect
 	golang.org/x/crypto v0.19.0 // indirect
 	golang.org/x/net v0.21.0 // indirect
 	golang.org/x/sys v0.17.0 // indirect
@@ -37,5 +35,3 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	olympos.io/encoding/edn v0.0.0-20201019073823-d3554ca0b0a3 // indirect
 )
-
-replace github.com/abielalejandro/tgs-service => ../tgs-service

@@ -19,19 +19,19 @@ type Api interface {
 	Run()
 }
 
-func NewApi(config *Config, svc *ShortenerService) Api {
+func NewApi(config *Config, svc ShortenerService) Api {
 	return NewHttpApi(config, svc)
 }
 
 type HttpApi struct {
 	config *Config
 	Router *mux.Router
-	svc    *ShortenerService
+	svc    ShortenerService
 }
 
 func NewHttpApi(
 	config *Config,
-	svc *ShortenerService) *HttpApi {
+	svc ShortenerService) *HttpApi {
 
 	return &HttpApi{
 		Router: mux.NewRouter().StrictSlash(true),
@@ -105,7 +105,7 @@ func (api *HttpApi) shortHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	msg := "Your short link was created successfuly"
-	shortGen := fmt.Sprintf("%v/%v", api.svc.config.App.Domain, short)
+	shortGen := fmt.Sprintf("%v/%v", api.config.App.Domain, short)
 	data.Ok = true
 	data.Message = &msg
 	data.Url = &shortGen

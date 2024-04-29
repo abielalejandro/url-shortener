@@ -71,7 +71,7 @@ type (
 
 	TgsService struct {
 		Url  string `yaml:"addr" env:"TGS_SERVICE_URL" env-default:"http://localhost:8080/api/v1/next"`
-		Type string `env-required:"true" yaml:"type"  env:"TGS_SERVICE_TYPE" env-default: "generic"`
+		Type string `env-required:"true" yaml:"type"  env:"TGS_SERVICE_TYPE" env-default: "grpc"`
 	}
 
 	Api struct {

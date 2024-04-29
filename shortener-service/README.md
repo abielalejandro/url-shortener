@@ -11,6 +11,14 @@ It handle the creation and searching os short urls
 
 Before run this service, you must to create the Cassandra db schema (internals/storage/cassandra.schema.cql)
 
+## How to run
+
+### Download dependencies
+```
+go mod download
+```
+
+
 ### Http api
 ```
 make run
@@ -24,7 +32,6 @@ go build -o bin ./...
 
 
 ### Example calls
-
 
 #### Create a short token
 
