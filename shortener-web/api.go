@@ -43,7 +43,7 @@ func NewHttpApi(
 func (httpApi *HttpApi) Run() {
 	httpApi.Router.HandleFunc("/health", httpApi.health).Methods("GET")
 	httpApi.Router.HandleFunc("/", httpApi.homeHandler).Methods(http.MethodGet)
-	httpApi.Router.HandleFunc("/short", httpApi.shortHandler).Methods(http.MethodPost)
+	httpApi.Router.HandleFunc("/", httpApi.shortHandler).Methods(http.MethodPost)
 	httpApi.Router.HandleFunc("/{short}", httpApi.searchShortHandler).Methods(http.MethodGet)
 	httpApi.Router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 
