@@ -64,3 +64,6 @@ curl --location 'http://localhost:8080/api/v1/short/REPLACE_WIT_TOKEN'
 
 ### Implementation with consistent hashing
 ![Arquitecture](./design/Implementation2.png)
+
+### Service discovery
+![Arquitecture](./design/consul.jpg)

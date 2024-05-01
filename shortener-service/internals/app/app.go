@@ -31,7 +31,7 @@ func NewApp(config *config.Config) *App {
 		CacheStorage:     cache,
 		ShortenerService: svc,
 		Api:              api.NewApi(config, svc, rate),
-		TgsService:       services.NewTgsService(config),
+		TgsService:       tgsService,
 	}
 }
 
