@@ -55,3 +55,12 @@ curl --location 'http://localhost:8080/api/v1/short/REPLACE_WIT_TOKEN'
 - Consul
   - Service discovery
 
+
+### Design
+![Arquitecture](./design/Shortener.png)
+
+### Implementation with consistent hashing
+![Arquitecture](./design/Implementation1.png)
+
+### Implementation with consistent hashing
+![Arquitecture](./design/Implementation2.png)
