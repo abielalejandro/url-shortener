@@ -3,6 +3,7 @@ package api
 import (
 	context "context"
 	"errors"
+	"fmt"
 	"net"
 
 	"github.com/abielalejandro/shortener-service/config"
@@ -11,6 +12,7 @@ import (
 	"github.com/abielalejandro/shortener-service/pkg/logger"
 	grpc "google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/reflection"
 	status "google.golang.org/grpc/status"
 )
@@ -19,17 +21,25 @@ type GrpcApi struct {
 	config    *config.Config
 	log       *logger.Logger
 	svc       services.Service
+	rate      *services.RateService
 	rpcServer *grpc.Server
 }
 
-func NewGrpcApi(config *config.Config, svc services.Service) *GrpcApi {
+func NewGrpcApi(
+	config *config.Config,
+	svc services.Service,
+	rate *services.RateService) *GrpcApi {
+
 	middleware := services.NewLogMiddleware(config, svc)
-	return &GrpcApi{
-		rpcServer: grpc.NewServer(),
-		log:       logger.New(config.Log.Level),
-		config:    config,
-		svc:       middleware,
+	api := &GrpcApi{
+		log:    logger.New(config.Log.Level),
+		config: config,
+		svc:    middleware,
+		rate:   rate,
 	}
+	api.rpcServer = grpc.NewServer(grpc.UnaryInterceptor(api.rateLimiterInterceptor))
+
+	return api
 }
 
 func (api *GrpcApi) Run() {
@@ -38,7 +48,6 @@ func (api *GrpcApi) Run() {
 	if err != nil {
 		api.log.Fatal(err)
 	}
-
 	RegisterShortenerServiceServer(api.rpcServer, api)
 	reflection.Register(api.rpcServer)
 	if err := api.rpcServer.Serve(listener); err != nil {
@@ -52,6 +61,38 @@ func (api *GrpcApi) Health(ctx context.Context, req *HealthRequest) (*HealthResp
 
 func (api *GrpcApi) mustEmbedUnimplementedShortenerServiceServer() {
 	api.log.Info("mustEmbedUnimplementedShortenerServiceServer")
+}
+
+func (api *GrpcApi) rateLimiterInterceptor(
+	ctx context.Context,
+	req any,
+	info *grpc.UnaryServerInfo,
+	handler grpc.UnaryHandler) (any, error) {
+
+	md, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		return nil, status.Errorf(codes.InvalidArgument, "missing metadata")
+	}
+
+	ip := md["client-ip"]
+	if len(ip) > 0 {
+		api.log.Info(fmt.Sprintf("cient ip %v", ip))
+		valid, err := api.rate.Validate(
+			ctx,
+			ip[0],
+			api.config.MaxRequests,
+			(api.config.RateLimiter.WindowTimeInSeconds / 60))
+
+		if err != nil {
+			return nil, status.Errorf(codes.Unknown, "error unknown")
+		}
+
+		if !valid {
+			return nil, status.Errorf(codes.ResourceExhausted, "Too many requests")
+		}
+	}
+
+	return handler(ctx, req)
 }
 
 func (api *GrpcApi) Search(ctx context.Context, req *SearchRequest) (*SearchResponse, error) {

@@ -8,11 +8,13 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"runtime"
 	"time"
 
 	api "github.com/abielalejandro/shortener-web/client"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/metadata"
 )
 
 type ShortenerService interface {
@@ -208,6 +210,10 @@ func (svc *GrpcShortenerService) Create(longUrl string, sourceIp string) (string
 
 	c := api.NewShortenerServiceClient(conn)
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+
+	cos := runtime.GOOS
+	ctx = metadata.AppendToOutgoingContext(ctx, "client-ip", sourceIp)
+	ctx = metadata.AppendToOutgoingContext(ctx, "client-os", cos)
 	defer cancel()
 	r, err := c.Create(ctx, &api.CreateRequest{
 		Url: longUrl,

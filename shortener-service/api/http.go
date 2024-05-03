@@ -154,7 +154,7 @@ func (httpApi *HttpApi) rateLimiterMiddleware(next http.Handler) http.Handler {
 			return
 		}
 
-		if valid == false {
+		if !valid {
 			sendErrorResponse(w, http.StatusTooManyRequests, "Too many requests")
 			return
 		}

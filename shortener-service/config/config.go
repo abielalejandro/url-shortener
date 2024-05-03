@@ -75,7 +75,7 @@ type (
 	}
 
 	Api struct {
-		Type string `env-required:"true" yaml:"type"  env:"API_TYPE" env-default: "http"`
+		Type string `env-required:"true" yaml:"type"  env:"API_TYPE" env-default: "grpc"`
 	}
 )
 
