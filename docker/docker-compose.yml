@@ -12,6 +12,8 @@ services:
       - 10.50.0.100
     volumes:
      - ./consul/server.json:/etc/consul.d/server.json:ro
+     - ./consul/shortener-service.resolver.json:/tmp/shortener-service.resolver.json:ro
+     - ./consul/tgs-service.resolver.json:/tmp/tgs-service.resolver.json:ro
     networks:
       shortener:
         ipv4_address: 10.50.0.100

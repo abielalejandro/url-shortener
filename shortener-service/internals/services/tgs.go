@@ -33,7 +33,7 @@ func (svc *TgsServiceRest) Next(url string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	req.Header.Set("X-URL-HASH", utils.ToBase62(url))
+	req.Header.Set("x-url-hash", url)
 	res, err := client.Do(req)
 	if err != nil {
 		return "", err

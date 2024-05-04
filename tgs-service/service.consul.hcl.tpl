@@ -1,5 +1,5 @@
 service = {
-  name = "tgs-service"
+  name = "tgs"
   id = "tgs-service-${UUID}"
   port = 8080
   check = {

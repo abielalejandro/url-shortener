@@ -7,6 +7,7 @@ import (
 	"github.com/abielalejandro/shortener-service/config"
 	grpc "google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/metadata"
 )
 
 type TgsServiceGrpc struct {
@@ -24,6 +25,9 @@ func (svc *TgsServiceGrpc) Next(url string) (string, error) {
 	c := NewTgsServiceClient(conn)
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
+
+	ctx = metadata.AppendToOutgoingContext(ctx, "x-url-hash", url)
+
 	r, err := c.Next(ctx, &NextRequest{})
 	if err != nil {
 		return "", err

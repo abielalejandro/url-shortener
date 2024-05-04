@@ -20,6 +20,13 @@ cd docker
 docker compose docker-compose up -d
 ```
 
+Register the hash ring (optional)
+
+```
+docker exec -it consul-server consul config write /tmp/shortener-service.resolver.json
+docker exec -it consul-server consul config write /tmp/tgs-service.resolver.json
+```
+
 ### Using the web
 
 Access to http://localhost:8080

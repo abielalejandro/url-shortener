@@ -1,0 +1,22 @@
+{
+  "kind": "service-resolver",
+  "name": "tgs-resolver",
+  "connect_timeout": "10s",
+  "request_timeout": "15s",
+  "subsets": {
+    "tgs": {
+      "filter": "Service.Meta.name == tgs"
+    }
+  },
+  "load_balancer": {
+    "policy": "ring_hash",
+    "ring_hash_config": {
+      "minimum_ring_size": 1024,
+      "maximum_ring_size": 8192
+    },
+    "hash_policies": {
+      "field": "header",
+      "field_value": "x-url-hash"
+    }
+  }
+}

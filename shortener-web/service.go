@@ -91,7 +91,7 @@ func (svc *HttpShortenerService) Create(longUrl string, sourceIp string) (string
 	}
 	req.Header.Set("X-Real-Ip", sourceIp)
 	req.Header.Set("X-Forwarded-For", sourceIp)
-	req.Header.Set("X-URL-HASH", ToBase62(sourceIp))
+	req.Header.Set("x-url-hash", longUrl)
 	res, err := client.Do(req)
 	if err != nil {
 		return "", err
@@ -132,7 +132,7 @@ func (svc *HttpShortenerService) Search(short string, sourceIp string) (string, 
 	res, err := client.Do(req)
 	req.Header.Set("X-Real-Ip", sourceIp)
 	req.Header.Set("X-Forwarded-For", sourceIp)
-	req.Header.Set("X-URL-HASH", ToBase62(sourceIp))
+	req.Header.Set("x-url-hash", short)
 	if err != nil {
 		return "", err
 	}
@@ -171,7 +171,7 @@ func (svc *HttpShortenerService) Health(sourceIp string) (string, error) {
 	res, err := client.Do(req)
 	req.Header.Set("X-Real-Ip", sourceIp)
 	req.Header.Set("X-Forwarded-For", sourceIp)
-	req.Header.Set("X-URL-HASH", ToBase62(sourceIp))
+	req.Header.Set("x-url-hash", sourceIp)
 	if err != nil {
 		return "", err
 	}
@@ -214,6 +214,7 @@ func (svc *GrpcShortenerService) Create(longUrl string, sourceIp string) (string
 	cos := runtime.GOOS
 	ctx = metadata.AppendToOutgoingContext(ctx, "client-ip", sourceIp)
 	ctx = metadata.AppendToOutgoingContext(ctx, "client-os", cos)
+	ctx = metadata.AppendToOutgoingContext(ctx, "x-url-hash", longUrl)
 	defer cancel()
 	r, err := c.Create(ctx, &api.CreateRequest{
 		Url: longUrl,
@@ -237,6 +238,11 @@ func (svc *GrpcShortenerService) Search(short string, sourceIp string) (string, 
 	c := api.NewShortenerServiceClient(conn)
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
+
+	cos := runtime.GOOS
+	ctx = metadata.AppendToOutgoingContext(ctx, "client-ip", sourceIp)
+	ctx = metadata.AppendToOutgoingContext(ctx, "client-os", cos)
+	ctx = metadata.AppendToOutgoingContext(ctx, "x-url-hash", short)
 	r, err := c.Search(ctx, &api.SearchRequest{
 		Url: short,
 	})
@@ -260,6 +266,12 @@ func (svc *GrpcShortenerService) Health(sourceIp string) (string, error) {
 	c := api.NewShortenerServiceClient(conn)
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
+
+	cos := runtime.GOOS
+	ctx = metadata.AppendToOutgoingContext(ctx, "client-ip", sourceIp)
+	ctx = metadata.AppendToOutgoingContext(ctx, "client-os", cos)
+	ctx = metadata.AppendToOutgoingContext(ctx, "x-url-hash", sourceIp)
+
 	r, err := c.Health(ctx, &api.HealthRequest{})
 
 	if err != nil {

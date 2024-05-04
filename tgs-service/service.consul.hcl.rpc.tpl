@@ -1,5 +1,5 @@
 service = {
-  name = "tgs-service-rpc"
+  name = "tgs"
   id = "tgs-service-${UUID}"
   port = 9000
   check = {
